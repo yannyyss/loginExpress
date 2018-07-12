@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const sendWelcomeMail = require('../helpers/mailer').sendWelcomeMail; //va a enviar diferentes tipos de correo. Y diferentes métodos: send welcome mail, send newsletter, etc.
 
 function isAuthenticated(req,res,next){
     if(req.session.currentUser){
@@ -61,15 +62,12 @@ router.get('/signup', (req,res)=>{
 //2 necesitamos chear las contraseñas que coincidan
 //3 crear al usuario en la db
 router.post('/signup', (req,res,next)=>{
-    if(req.body.password !== req.body.password2){
-        req.body.error = 'escribe bien la contraseña!';
-        return res.render('auth/signup', req.body)
-    }
-    //encriptar la contraseña
-    const hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
-    req.body.password = hash;
-    User.create(req.body)
-    .then(user=>res.send(user))
+
+    User.register(req.body, req.body.password)
+    .then(user=>{
+        sendWelcomeMail(user);
+        res.redirect('/login')
+    })
     .catch(e=>next(e))
 })
 
