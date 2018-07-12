@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const sendWelcomeMail = require('../helpers/mailer').sendWelcomeMail; //va a enviar diferentes tipos de correo. Y diferentes métodos: send welcome mail, send newsletter, etc.
+const sendTemplate = require('../helpers/mailer').sendTemplate; //Puede enviar lo que quieras e el email. Diferentes métodos: send welcome mail, send newsletter, etc.
 
 function isAuthenticated(req,res,next){
     if(req.session.currentUser){
@@ -65,7 +65,7 @@ router.post('/signup', (req,res,next)=>{
 
     User.register(req.body, req.body.password)
     .then(user=>{
-        sendWelcomeMail(user);
+        sendTemplate(user);
         res.redirect('/login')
     })
     .catch(e=>next(e))
